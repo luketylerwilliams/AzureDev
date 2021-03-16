@@ -1,0 +1,2 @@
+The best script I have seen for this is https://github.com/Cloudyn/azure-enable-diagnostics
+This automagically creates policies for resources which you have deployed in your environment. It however does not cover resources you may intend to use in the future - it will need to be ran again to create a policy for those.
