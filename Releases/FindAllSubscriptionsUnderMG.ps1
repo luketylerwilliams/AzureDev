@@ -19,32 +19,54 @@ param (
 )
 
 $WarningPreference = "Ignore"
-$mgScope = Get-AzManagementGroup -GroupId $script:scope -Expand -Recurse
-
+$global:setScope = $script:scope
+$global:scopeObject = @()
 $depth = 0
-$scopeChildArray = @()
+$global:scopeChildArray = @{}
 
 function hasChildren() {
     try {
-        $getChildren = getScope | Select-Object -ExpandProperty Children
+        $getChildren = $global:scopeObject | Select-Object -ExpandProperty Children
+        $getScopeName = $global:scopeObject | Select-Object -ExpandProperty Name
+        $global:scopeChildArray.$getScopeName = @()
         if ($getChildren.count -ne 0) {
             Write-Host "Scope has children"
-            $global:scopeChildArray = $getChildren
+            $getChildren
+            foreach ($child in $getChildren) {
+                $global:scopeChildArray.$getScopeName
+                $global:scopeChildArray.$getScopeName += $child.Name
+
+                $global:setScope = $child.Name
+                getScope
+                
+            }
+             
         }
         else {
             Write-Host "Provided Scope does not have any children"
         }
     }
     catch {
-        Write-Host "Provided Scope does not have any children"
+        Write-Host "Problem"
         break
     }
 }
 
 function getScope() {
     try {
-        Get-AzManagementGroup -GroupId $script:scope -Expand -Recurse
+        $global:scopeObject = Get-AzManagementGroup -GroupId $global:setScope -Expand -Recurse
+        hasChildren
+    }
+    catch {
+        Write-Host "problem"
+    }
+}
+
+function testInitialScope() {
+    try {
+        Get-AzManagementGroup -GroupId $global:setScope -Expand -Recurse
         Write-Host "Scope is valid" -ForegroundColor Green
+        getScope
     }
     catch {
         Write-Host "Provided Scope is invalid"
@@ -60,8 +82,8 @@ function childrenHaveChildren() {
 }
 
 function Main() {
+    testInitialScope
     getScope
-    hasChildren
     #childrenHaveChildren
 }
 
