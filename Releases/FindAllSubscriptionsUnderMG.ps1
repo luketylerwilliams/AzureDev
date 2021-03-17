@@ -15,65 +15,54 @@ Specify the management group scope to which you are trying to select
 param (
     # height of largest column without top bar
     [Parameter()]
-    [string]$scope,
-
-    [Parameter()]
-    [ValidateSet(
-        "List",
-        "Remove"
-    )]
-    [string]
-    $runType = "List" # Default run type is list. If remove is specified then it will take that effect
+    [string]$scope
 )
 
-$mgScope = Get-AzManagementGroup -GroupId Global -Expand -Recurse
+$WarningPreference = "Ignore"
+$mgScope = Get-AzManagementGroup -GroupId $script:scope -Expand -Recurse
 
 $depth = 0
-$getChildren = @()
-$hasChildren = 0
-try { 
-    $getChildren = $mgScope | Select -ExpandProperty Children
-    if ($getChildren.count -ne 0) {
-        
-    }
-    $hasChildren = 1
-}
-catch {
-    Write-Host "No children"
-    $hasChildren = 0
-}
-
-if ($hasChildren -eq 0) {
-    try {
-
-    }
-    catch {
-
-    }
-} 
-
-function Main() {
-
-}
-
-. Main
+$scopeChildArray = @()
 
 function hasChildren() {
     try {
-
+        $getChildren = getScope | Select-Object -ExpandProperty Children
+        if ($getChildren.count -ne 0) {
+            Write-Host "Scope has children"
+            $global:scopeChildArray = $getChildren
+        }
+        else {
+            Write-Host "Provided Scope does not have any children"
+        }
     }
     catch {
         Write-Host "Provided Scope does not have any children"
+        break
     }
 }
 
 function getScope() {
     try {
-
+        Get-AzManagementGroup -GroupId $script:scope -Expand -Recurse
+        Write-Host "Scope is valid" -ForegroundColor Green
     }
     catch {
-        Write-Host "Provided Scope does not have any children"
+        Write-Host "Provided Scope is invalid"
+        break
     }
 }
 
+function childrenHaveChildren() {
+    foreach ($child in $scopeChildArray) {
+        Get-AzManagementGroup -GroupId $child -Expand -Recurse
+    }
+    $getChildren = getScope | Select-Object -ExpandProperty Children
+}
 
+function Main() {
+    getScope
+    hasChildren
+    #childrenHaveChildren
+}
+
+. Main
