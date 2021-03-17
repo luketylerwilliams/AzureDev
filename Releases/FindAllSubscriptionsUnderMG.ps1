@@ -21,8 +21,9 @@ param (
 $WarningPreference = "Ignore"
 $global:setScope = $script:scope
 $global:scopeObject = @()
-$depth = 0
 $global:scopeChildArray = @{}
+$global:returnScope = $script:scope
+$results = @()
 
 function hasChildren() {
     try {
@@ -31,16 +32,11 @@ function hasChildren() {
         $global:scopeChildArray.$getScopeName = @()
         if ($getChildren.count -ne 0) {
             Write-Host "Scope has children"
-            $getChildren
             foreach ($child in $getChildren) {
-                $global:scopeChildArray.$getScopeName
-                $global:scopeChildArray.$getScopeName += $child.Name
-
+                $global:scopeChildArray.$getScopeName += $child.Name   
                 $global:setScope = $child.Name
                 getScope
-                
-            }
-             
+            }  
         }
         else {
             Write-Host "Provided Scope does not have any children"
@@ -48,17 +44,16 @@ function hasChildren() {
     }
     catch {
         Write-Host "Problem"
-        break
     }
 }
 
 function getScope() {
     try {
-        $global:scopeObject = Get-AzManagementGroup -GroupId $global:setScope -Expand -Recurse
+        $global:scopeObject = Get-AzManagementGroup -GroupId $global:setScope -Expand -Recurse -ErrorAction Ignore
         hasChildren
     }
     catch {
-        Write-Host "problem"
+        Write-Host "Problem"
     }
 }
 
@@ -74,17 +69,37 @@ function testInitialScope() {
     }
 }
 
-function childrenHaveChildren() {
-    foreach ($child in $scopeChildArray) {
-        Get-AzManagementGroup -GroupId $child -Expand -Recurse
-    }
-    $getChildren = getScope | Select-Object -ExpandProperty Children
+function result() {
+    drawHierarchy
 }
+
+function drawHierarchy() {
+    Write-Host "============================================"
+    Write-Host "================FINAL OUTPUT================"
+    Write-Host "============================================"
+    Write-Host "Scope: " $global:returnScope -ForegroundColor Yellow
+    returnHierarchy
+} 
+
+function returnHierarchy() {
+    $results = @()
+    foreach ($val in $global:returnScope) {
+        $results = $global:scopeChildArray.GetEnumerator() | Where-Object { $_.Key -eq $global:returnScope } | Select -ExpandProperty Value
+        foreach ($result in $results) {
+            Write-Host $global:returnScope "|||" $result
+        }
+    }
+    foreach ($result in $results) {
+        $global:returnScope = $result
+        returnHierarchy
+    }
+}
+
 
 function Main() {
     testInitialScope
     getScope
-    #childrenHaveChildren
+    result
 }
 
 . Main
