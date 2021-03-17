@@ -97,6 +97,7 @@ function returnHierarchy() {
 
 
 function Main() {
+    Connect-AzAccount
     testInitialScope
     getScope
     result
