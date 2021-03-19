@@ -1,4 +1,4 @@
-#FindAllSubscriptionsUnderMG.ps1
+# FindAllSubscriptionsUnderMG.ps1
 
 For more information please see the article on Medium!
 
