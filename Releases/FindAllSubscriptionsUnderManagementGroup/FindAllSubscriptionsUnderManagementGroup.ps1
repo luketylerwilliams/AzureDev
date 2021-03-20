@@ -1,19 +1,19 @@
 <#
 .Synopsis
-A scipt for finding all of the subscriptions with a given management group scope
+A script for finding all of the subscriptions and management groups with a given management group scope
 .DESCRIPTION
-For such a seemingly simple objective there is currently no easy way to list/retrieve all of the subscriptions under a given management group. 
-This script also aims to include nested subscriptions which are within management groups beneath the given scope.
+For such a seemingly simple objective there is currently no easy way to list/retrieve all of the subscriptions and management groups
+from a given management group scope. 
+This script also includes nested subscriptions which are within management groups beneath the given scope.
 .Notes
 Version   : 1.0
 Author    : Luke Tyler Williams
 Twitter   : @LT_Williams
 Disclaimer: Please use this script at your own discretion, the author is not responsible for any result
 .PARAMETER scope
-Specify the management group scope to which you are trying to select
+Specify the management group scope to which you are trying to target
 #>
 param (
-    # height of largest column without top bar
     [Parameter()]
     [string]$scope
 )
@@ -84,7 +84,7 @@ function drawHierarchy() {
 function returnHierarchy() {
     $results = @()
     foreach ($val in $global:returnScope) {
-        $results = $global:scopeChildArray.GetEnumerator() | Where-Object { $_.Key -eq $global:returnScope } | Select -ExpandProperty Value
+        $results = $global:scopeChildArray.GetEnumerator() | Where-Object { $_.Key -eq $global:returnScope } | Select-Object -ExpandProperty Value
         foreach ($result in $results) {
             Write-Host $global:returnScope "|||" $result
         }
@@ -94,7 +94,6 @@ function returnHierarchy() {
         returnHierarchy
     }
 }
-
 
 function Main() {
     Connect-AzAccount
