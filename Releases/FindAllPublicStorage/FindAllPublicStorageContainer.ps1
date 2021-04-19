@@ -86,14 +86,10 @@ $WarningPreference = "Ignore"
 $global:setScope = $script:scopeId
 $global:scopeObject = @()
 $global:scopeChildArray = @()
-$global:returnScope = $script:scope
 $global:subscriptionArray = @()
-# Extra
-$global:resourcesWithDiagSubscriptions = @()
-$global:showSubMenu = 1
-$global:resourcesWithDiag = @()
-# Logic for reassessing after deletion
-$global:deletionRan = 0
+# Options
+$global:usageOption
+
 
 function ScopeSelection() {
     if ($script:scope.ToLower() -eq "management group" -or $script:scope -eq 1) {
@@ -279,8 +275,8 @@ function subMenu() {
 2: Find all containers with blob access level(anonymous read)
 3: Find all containers with container access level (anonymous read access for containers and blobs)
 4: Find all containers with blob and container access level
-5: Set option to: Use SAS
-6: Set option to: Use privileged account
+5: Set usage option to: Use SAS
+6: Set usage option to: Use privileged account
 Q: Press "Q" to quit' -ForegroundColor Cyan
     $selection = Read-Host "Please make a selection"
     switch ($selection) {
